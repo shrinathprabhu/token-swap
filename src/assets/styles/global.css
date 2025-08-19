@@ -13,8 +13,9 @@
   --color-border-fade: #fafdff80;
   --color-image-skeleton: #dfe6eb;
   --color-mist: #dcdcdc;
+  --color-slate: #4c626e;
 
-  --card-border-radius: 0.5rem;
+  --card-border-radius: 1.25rem;
   --card-border-width: 0.75rem;
 
   --button-border-radius: 100px;
@@ -70,10 +71,17 @@ body {
   color: var(--color-dark);
 }
 
+h2 {
+  font-weight: 600;
+  font-size: var(--fs-32);
+  line-height: 1.25;
+}
+
 .card {
-  background-color: var(--color-white);
+  background-color: var(--color-light);
   border-radius: var(--card-border-radius);
   border: var(--card-border-width) solid var(--color-border-fade);
+  background-clip: padding-box;
 }
 
 .link {
@@ -103,6 +111,10 @@ body {
 .button.primary {
   background-color: var(--color-dark);
   color: var(--color-light);
+}
+
+.button.secondary {
+  background-color: var(--color-light);
 }
 
 .button:disabled {
@@ -145,4 +157,44 @@ body {
 .text-input:has(:disabled) {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.center-column {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  overflow: auto;
+  padding: 2rem;
+}
+
+.center-column .card {
+  width: min(100%, 40rem);
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.text-center {
+  text-align: center;
 }

@@ -1,6 +1,6 @@
 <template>
   <header id="app-header">
-    <div class="header-content">
+    <div class="header-content flex align-center">
       <img src="../assets/images/avail-logo.svg" />
       <button class="button primary">Disconnect</button>
     </div>
@@ -10,8 +10,6 @@
 
 <style lang="css" scoped>
 .header-content {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
   padding-inline: 2rem;
 }

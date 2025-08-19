@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppHeader from './components/AppHeader.vue'
-import AppLogin from './components/AppLogin.vue'
+// import AppLogin from './components/AppLogin.vue'
 import AppFooter from './components/AppFooter.vue'
 import AppDeposit from './components/AppDeposit.vue'
 import AppWithdraw from './components/AppWithdraw.vue'
@@ -10,7 +10,7 @@ import AppWithdraw from './components/AppWithdraw.vue'
   <main>
     <AppHeader />
     <div>
-      <AppLogin />
+      <!-- <AppLogin /> -->
       <div>
         <AppDeposit />
         <AppWithdraw />
