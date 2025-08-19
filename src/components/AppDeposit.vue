@@ -19,6 +19,17 @@ const isSimulated = reactive({
   unlock2: false,
 })
 
+function getWidthFromText(text: string) {
+  const windowSize = window.innerWidth
+  const canvas = document.createElement('canvas')
+  const context = canvas.getContext('2d')!
+  context.font = `500 ${windowSize > 767 ? '24' : '21'}px Inter`
+  const metrics = context.measureText(text)
+  const textWidth = metrics.width
+  canvas.remove()
+  return textWidth + (windowSize > 767 ? 16 : 14)
+}
+
 window.simulateDeadline = function (expired = false, revert = false) {
   if (expired) isSimulated.expired = revert ? false : true
   isSimulated.deadline = revert ? false : true
@@ -71,9 +82,9 @@ const isUnlock2 = computed(() => {
 
 function handleXARChange() {
   if (!xarAmount.value) return
-  const totalChars = xarAmount.value.length
+  const textWidth = getWidthFromText(xarAmount.value)
   if (inputXar.value) {
-    inputXar.value.style.width = `${totalChars}rem`
+    inputXar.value.style.width = `${textWidth}px`
     if (new Decimal(xarAmount.value || 0).greaterThan(xarAvailable.value || 0)) {
       inputXar.value.setCustomValidity('Entered amount is greater than MAX')
     } else {
@@ -84,8 +95,8 @@ function handleXARChange() {
 
 function handleAVAILChange() {
   if (availAmount.value === undefined) return
-  const totalChars = availAmount.value.length
-  if (inputAvail.value) inputAvail.value.style.width = `${totalChars}rem`
+  const textWidth = getWidthFromText(availAmount.value)
+  if (inputAvail.value) inputAvail.value.style.width = `${textWidth}px`
 }
 
 function handleInput(event: KeyboardEvent) {
