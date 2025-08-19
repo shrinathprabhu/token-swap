@@ -7,4 +7,12 @@ declare global {
   }
 }
 
+interface ImportMetaEnv {
+  readonly VITE_APP_REOWN_PROJECT_ID: string
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv
+}
+
 export {}

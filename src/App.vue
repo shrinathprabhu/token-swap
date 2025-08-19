@@ -7,6 +7,10 @@ import AppWithdraw from './components/AppWithdraw.vue'
 import { useStateStore } from './stores/state'
 
 const state = useStateStore()
+
+state.initAppKit().then(() => {
+  state.checkSavedConnection()
+})
 </script>
 
 <template>
