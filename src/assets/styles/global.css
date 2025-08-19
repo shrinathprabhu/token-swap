@@ -102,10 +102,11 @@ button {
 a {
   text-decoration: none;
   cursor: pointer;
+  color: var(--color-dark);
 }
 
 a:visited {
-  color: currentColor;
+  color: var(--color-dark);
 }
 
 .link {
