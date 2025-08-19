@@ -1,3 +1,13 @@
+<script setup lang="ts">
+import { useStateStore } from '@/stores/state'
+
+const state = useStateStore()
+
+async function handleConnect() {
+  await state.connectWallet()
+}
+</script>
+
 <template>
   <div id="app-login" class="center-column">
     <div class="card login flex-col align-center">
@@ -7,7 +17,7 @@
           Connect the wallet that contains the XAR tokens on the Ethereum network
         </p>
       </div>
-      <button class="button primary">Connect Wallet</button>
+      <button class="button primary" @click.stop="handleConnect">Connect Wallet</button>
     </div>
     <div class="card news">
       <img style="height: 6.875rem; width: 10rem" class="img" />
@@ -17,12 +27,16 @@
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
         </div>
       </div>
-      <button class="button secondary" style="cursor: pointer">View Now</button>
+      <a href="#" class="button secondary" style="cursor: pointer">View Now</a>
     </div>
   </div>
 </template>
 
 <style lang="css" scoped>
+.center-column {
+  padding-block: 2rem;
+}
+
 .login {
   padding: 2.5rem 2rem;
   gap: 2.5rem;

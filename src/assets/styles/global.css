@@ -14,12 +14,16 @@
   --color-image-skeleton: #dfe6eb;
   --color-mist: #dcdcdc;
   --color-slate: #4c626e;
+  --color-light-slate: #74919c;
+  --color-light-card: #f8f9fd;
 
   --card-border-radius: 1.25rem;
   --card-border-width: 0.75rem;
 
   --button-border-radius: 100px;
   --button-border-width: 1.5px;
+
+  --chip-border-radius: 0.5rem;
 
   --input-border-radius: 0.75rem;
 
@@ -43,9 +47,13 @@ html {
   }
 }
 
-* {
+body {
   font-family: 'DM Sans Variable', sans-serif;
   line-height: 1.5;
+}
+
+.font-inter {
+  font-family: 'Inter', sans-serif;
 }
 
 html,
@@ -77,11 +85,27 @@ h2 {
   line-height: 1.25;
 }
 
+input,
+button {
+  background: none;
+  border: none;
+  outline: none;
+}
+
 .card {
   background-color: var(--color-light);
   border-radius: var(--card-border-radius);
   border: var(--card-border-width) solid var(--color-border-fade);
   background-clip: padding-box;
+}
+
+a {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+a:visited {
+  color: currentColor;
 }
 
 .link {
@@ -122,7 +146,7 @@ h2 {
   cursor: not-allowed;
 }
 
-.button:hover {
+.button:hover:not(:disabled) {
   opacity: 0.85;
   filter: contrast(1.15);
 }
@@ -133,7 +157,7 @@ h2 {
 }
 
 .alert-chip {
-  border-radius: var(--card-border-radius);
+  border-radius: var(--chip-border-radius);
   display: flex;
   gap: 8px;
   align-items: center;
@@ -152,11 +176,36 @@ h2 {
 .text-input {
   background-color: var(--color-light-grey);
   border-radius: var(--input-border-radius);
+  transition: outline-color 0.3s ease-out;
+  outline: 1.5px solid transparent;
+  display: flex;
+  align-items: center;
+  height: 3.5rem;
+  padding: 0.75rem 0.25rem 0.75rem 1rem;
 }
 
 .text-input:has(:disabled) {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.text-input:has(:focus, :focus-visible):not(:disabled) {
+  outline: 1.5px solid var(--color-mist);
+}
+
+.text-input:has(:invalid, :user-invalid):not(:disabled) {
+  outline: 1.5px solid var(--color-red) !important;
+}
+
+.text-input + .message-container .error-message {
+  visibility: hidden;
+  color: var(--color-red);
+  font-weight: 500;
+  font-size: var(--fs-12);
+}
+
+.text-input:has(:invalid, :user-invalid):not(:disabled) + .message-container .error-message {
+  visibility: visible;
 }
 
 .center-column {
@@ -197,4 +246,12 @@ h2 {
 
 .text-center {
   text-align: center;
+}
+
+.text-slate {
+  color: var(--color-slate);
+}
+
+.text-light-slate {
+  color: var(--color-light-slate);
 }
