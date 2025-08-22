@@ -4,9 +4,12 @@ import ArrowUpIcon from './icons/ArrowUpIcon.vue'
 import Decimal from 'decimal.js'
 import InfoCircleIcon from './icons/InfoCircleIcon.vue'
 import dayjs from 'dayjs'
+import { useStateStore } from '@/stores/state'
 
+const state = useStateStore()
 const xarAmount = ref('0.00')
-const xarAvailable = ref('5000000')
+const xarDecimals = Decimal.pow(10, 18)
+const xarAvailable = computed(() => new Decimal(state.xarBalance).div(xarDecimals).toFixed())
 const inputXar = ref<HTMLInputElement | null>()
 const inputAvail = ref<HTMLInputElement | null>()
 const unlock1Tokens = ref('0.0')
@@ -112,8 +115,7 @@ function handleInput(event: KeyboardEvent) {
 }
 
 async function handleDeposit() {
-  xarAvailable.value = new Decimal(xarAvailable.value).minus(xarAmount.value).toFixed()
-  unlock1Tokens.value = new Decimal(unlock1Tokens.value).add(availAmount.value).toFixed()
+  await state.deposit(BigInt(new Decimal(xarAmount.value).mul(xarDecimals).floor().toString()))
   xarAmount.value = '0.00'
 }
 

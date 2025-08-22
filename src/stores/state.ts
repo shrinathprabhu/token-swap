@@ -2,11 +2,18 @@ import { ref, readonly } from 'vue'
 import { defineStore } from 'pinia'
 
 import { createAppKit } from '@reown/appkit/vue'
-import { mainnet, type AppKitNetwork } from '@reown/appkit/networks'
+import { mainnet, sepolia, type AppKitNetwork } from '@reown/appkit/networks'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
+import { getPublicClient, getWalletClient } from '@/utils/client'
+import { stakeContract, xarContract } from '@/utils/constants'
+import { stakeAbi, xarAbi } from '@/utils/abi'
 
 export const useStateStore = defineStore('state', () => {
   const isConnected = ref(false)
+  const address = ref('0x' as `0x${string}`)
+  const xarBalance = ref('0')
+  const depositAmount = ref('0')
+  const depositUnlocked = ref(false)
   const modal = ref<ReturnType<typeof createAppKit>>()
 
   async function initAppKit() {
@@ -19,7 +26,7 @@ export const useStateStore = defineStore('state', () => {
       icons: ['https://www.availproject.org/favicon.ico'],
     }
 
-    const networks: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet]
+    const networks: [AppKitNetwork, ...AppKitNetwork[]] = [sepolia]
 
     const wagmiAdapter = new WagmiAdapter({
       networks,
@@ -39,7 +46,11 @@ export const useStateStore = defineStore('state', () => {
 
   async function checkSavedConnection() {
     const account = modal.value?.getAccount()
-    if (account?.address) isConnected.value = true
+    if (account?.address) {
+      address.value = account.address
+      isConnected.value = true
+      await fetchDetails()
+    }
     console.log(account)
     modal.value?.subscribeEvents(async (ev) => {
       switch (ev.data.event) {
@@ -49,7 +60,10 @@ export const useStateStore = defineStore('state', () => {
           return
         }
         case 'CONNECT_SUCCESS': {
+          address.value =
+            (ev.data.address as `0x${string}`) || (await modal.value!.getAccount())?.address || '0x'
           isConnected.value = true
+          await fetchDetails()
           return
         }
         default:
@@ -68,11 +82,72 @@ export const useStateStore = defineStore('state', () => {
     isConnected.value = false
   }
 
+  async function fetchXARBalance() {
+    const client = getPublicClient()
+    const balance = await client.readContract({
+      address: xarContract,
+      abi: xarAbi,
+      functionName: 'balanceOf',
+      args: [address.value],
+    })
+    xarBalance.value = balance.toString()
+    return balance
+  }
+
+  async function deposit(amount: bigint) {
+    const client = getWalletClient(address.value)
+    const response = await client.writeContract({
+      address: stakeContract,
+      abi: stakeAbi,
+      functionName: 'deposit',
+      args: [amount],
+      chain: sepolia,
+      account: address.value,
+    })
+    return response
+  }
+
+  async function withdraw() {
+    const client = getWalletClient(address.value)
+    const response = await client.writeContract({
+      address: stakeContract,
+      abi: stakeAbi,
+      functionName: 'withdraw',
+      chain: sepolia,
+      account: address.value,
+    })
+    return response
+  }
+
+  async function getDeposits() {
+    const client = getPublicClient()
+    const response = await client.readContract({
+      address: stakeContract,
+      abi: stakeAbi,
+      functionName: 'deposits',
+      args: [address.value],
+    })
+    depositAmount.value = response[0].toString()
+    depositUnlocked.value = response[1]
+    return response
+  }
+
+  async function fetchDetails() {
+    await Promise.all([fetchXARBalance(), getDeposits()])
+  }
+
   return {
     isConnected: readonly(isConnected),
+    xarBalance: readonly(xarBalance),
+    //
     connectWallet,
     disconnectWallet,
     initAppKit,
     checkSavedConnection,
+    fetchXARBalance,
+    deposit,
+    withdraw,
+    getDeposits,
+    fetchDetails,
   }
 })
