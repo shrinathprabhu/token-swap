@@ -15,7 +15,7 @@ export const useStateStore = defineStore('state', () => {
     const metadata = {
       name: 'Avail Swap',
       description: 'Service to deposit XAR and get AVAIL',
-      url: 'https://swap.availproject.org',
+      url: window.location.origin,
       icons: ['https://www.availproject.org/favicon.ico'],
     }
 
