@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useStateStore } from '@/stores/state'
-import { getTransactionUrl, XARToAvailDivisor } from '@/utils/constants'
+import { getTransactionUrl, unlock1Time, unlock2Time, XARToAvailDivisor } from '@/utils/constants'
 import dayjs from 'dayjs'
 import Decimal from 'decimal.js'
 import { computed } from 'vue'
@@ -18,23 +18,9 @@ const depositAmount = computed(() => {
   return Decimal.div(state.depositAmount, xarDecimals).toFixed()
 })
 
-const isUnlock1 = computed(() => {
-  // if (state.depositUnlocked) {
-  //   return true
-  // }
-  const unlockPhase = dayjs('02-28-2026-00:00Z')
-  const current = dayjs()
-  return unlockPhase < current
-})
+const isUnlock1 = computed(() => unlock1Time < dayjs())
 
-const isUnlock2 = computed(() => {
-  // if (state.depositUnlocked) {
-  //   return true
-  // }
-  const unlockPhase = dayjs('08-28-2026-00:00Z')
-  const current = dayjs()
-  return unlockPhase < current
-})
+const isUnlock2 = computed(() => unlock2Time < dayjs())
 
 async function handleWithdraw(phase: number) {
   try {
@@ -78,7 +64,8 @@ async function handleWithdraw(phase: number) {
         <div class="withdraw-chip green" v-if="state.withdrew[0]">Completed</div>
         <div class="withdraw-chip" v-else-if="isUnlock1">Withdraw today</div>
         <div class="withdraw-chip" v-else>
-          Withdraw on <span style="font-weight: 500">February 28, 2026</span>
+          Withdraw on
+          <span style="font-weight: 500">{{ unlock1Time.format('MMMM DD, YYYY') }}</span>
         </div>
       </div>
       <div v-if="Number(depositAmount)" class="flex justify-between align-center">
@@ -119,7 +106,8 @@ async function handleWithdraw(phase: number) {
         <div class="withdraw-chip green" v-if="state.withdrew[1]">Completed</div>
         <div class="withdraw-chip" v-else-if="isUnlock2">Withdraw today</div>
         <div class="withdraw-chip" v-else>
-          Withdraw on <span style="font-weight: 500">August 28, 2026</span>
+          Withdraw on
+          <span style="font-weight: 500">{{ unlock2Time.format('MMMM DD, YYYY') }}</span>
         </div>
       </div>
       <div v-if="Number(depositAmount)" class="flex justify-between align-center">

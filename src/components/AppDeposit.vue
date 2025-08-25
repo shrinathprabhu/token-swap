@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import ArrowUpIcon from './icons/ArrowUpIcon.vue'
 import Decimal from 'decimal.js'
 import InfoCircleIcon from './icons/InfoCircleIcon.vue'
 import dayjs from 'dayjs'
 import { useStateStore } from '@/stores/state'
-import { XARToAvailDivisor } from '@/utils/constants'
+import { deadlineTime, XARToAvailDivisor } from '@/utils/constants'
 
 const state = useStateStore()
 const xarAmount = ref('0.00')
@@ -13,13 +13,6 @@ const xarDecimals = Decimal.pow(10, 18)
 const xarAvailable = computed(() => new Decimal(state.xarBalance).div(xarDecimals).toFixed())
 const inputXar = ref<HTMLInputElement | null>()
 const inputAvail = ref<HTMLInputElement | null>()
-
-const isSimulated = reactive({
-  expired: false,
-  deadline: false,
-  unlock1: false,
-  unlock2: false,
-})
 
 function getWidthFromText(text: string) {
   const windowSize = window.innerWidth
@@ -32,36 +25,17 @@ function getWidthFromText(text: string) {
   return textWidth + (windowSize > 767 ? 16 : 14)
 }
 
-window.simulateDeadline = function (expired = false, revert = false) {
-  if (expired) isSimulated.expired = revert ? false : true
-  isSimulated.deadline = revert ? false : true
-}
-
-window.simulateUnlock = function (num = 1, revert = false) {
-  if (num === 1) {
-    isSimulated.unlock1 = revert ? false : true
-  } else {
-    isSimulated.unlock2 = revert ? false : true
-  }
-}
-
 const availAmount = computed(() => {
   if (!xarAmount.value) return '0'
   return Decimal.div(xarAmount.value, XARToAvailDivisor).toFixed()
 })
 
 const isDeadlineNear = computed(() => {
-  if (isSimulated.deadline) {
-    return true
-  }
-  return dayjs('02-28-2026-00:00Z').subtract(15, 'days') < dayjs()
+  return deadlineTime.subtract(15, 'days') < dayjs()
 })
 
 const isDeadlineOver = computed(() => {
-  if (isSimulated.expired) {
-    return true
-  }
-  return dayjs('02-28-2026-00:00Z') < dayjs()
+  return deadlineTime < dayjs()
 })
 
 function handleXARChange() {
@@ -185,8 +159,8 @@ watch(availAmount, handleAVAILChange, { immediate: true })
       <div class="alert-chip" :class="{ blue: !isDeadlineNear, orange: isDeadlineNear }">
         <InfoCircleIcon style="height: 1.25rem; width: 1.25rem" />
         <span
-          >The final deadline for deposit is February 28, 2026. No deposits will be accepted after
-          this date.</span
+          >The final deadline for deposit is {{ deadlineTime.format('MMMM DD, YYYY') }}. No deposits
+          will be accepted after this date.</span
         >
       </div>
       <button
