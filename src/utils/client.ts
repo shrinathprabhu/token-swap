@@ -11,8 +11,8 @@ import { sepolia } from 'viem/chains'
 let publicClient: PublicClient
 let walletClient: WalletClient
 
-export const sepoliaRpcUrl = 'https://1rpc.io/sepolia'
-export const mainnetRpcUrl = 'https://eth.drpc.org'
+export const sepoliaRpcUrl = 'https://ethereum-sepolia-rpc.publicnode.com'
+export const mainnetRpcUrl = 'https://ethereum-rpc.publicnode.com'
 
 export function getPublicClient() {
   if (publicClient) return publicClient
