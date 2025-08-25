@@ -14,18 +14,18 @@ const state = useStateStore()
     >
       <button
         style="position: absolute; top: 0.75rem; right: 0.75rem; cursor: pointer"
-        @click.stop="state.hideError"
+        @click.stop="state.hideSuccess"
       >
         <CrossIcon style="height: 1.25rem; width: 1.25rem; color: var(--color-light-slate)" />
       </button>
       <img
-        src="../assets/images/error-exclamation.svg"
+        src="../assets/images/success-check.svg"
         style="width: 6rem; height: 6rem; border-radius: 50%"
       />
-      <span class="loading-message text-center">{{ state.error.message }}</span>
+      <span class="loading-message text-center">{{ state.success.message }}</span>
       <a
-        v-if="state.error.transaction"
-        :href="state.error.transaction"
+        v-if="state.success.transaction"
+        :href="state.success.transaction"
         target="_blank"
         class="link text-center"
         style="color: var(--color-blue); text-transform: uppercase"

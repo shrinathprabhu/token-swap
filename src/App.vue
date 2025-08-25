@@ -7,6 +7,7 @@ import { useStateStore } from './stores/state'
 import AppLoader from './components/AppLoader.vue'
 import AppBanner from './components/AppBanner.vue'
 import AppError from './components/AppError.vue'
+import AppSuccess from './components/AppSuccess.vue'
 
 const state = useStateStore()
 
@@ -28,6 +29,7 @@ state.initAppKit().then(() => {
     <AppFooter />
     <AppLoader v-if="state.loader.loading" />
     <AppError v-if="state.error.show" />
+    <AppSuccess v-if="state.success.show" />
   </main>
 </template>
 

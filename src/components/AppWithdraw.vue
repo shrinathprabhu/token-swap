@@ -25,12 +25,19 @@ const isUnlock2 = computed(() => unlock2Time < dayjs())
 async function handleWithdraw(phase: number) {
   try {
     state.showLoader(`Withdrawing AVAIL...`)
-    await state.withdraw(phase)
+    const res = await state.withdraw(phase)
     await state.fetchDetails()
+    state.showSuccess(`Withdraw Success`, getTransactionUrl(res))
   } catch (e) {
     console.log('Error on Withdraw', e)
-    // eslint-disable-next-line
-    state.showError((e as any).message)
+    state.showError(
+      'Transaction Execution Reverted',
+      // eslint-disable-next-line
+      (e as any)?.data?.receipt?.transactionHash
+        ? // eslint-disable-next-line
+          getTransactionUrl((e as any).data.receipt.transactionHash)
+        : undefined,
+    )
   } finally {
     state.hideLoader()
   }

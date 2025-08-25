@@ -19,6 +19,12 @@ export const useStateStore = defineStore('state', () => {
   const error = reactive({
     message: '',
     show: false,
+    transaction: '',
+  })
+  const success = reactive({
+    message: '',
+    show: false,
+    transaction: '',
   })
   const address = ref('0x' as `0x${string}`)
   const xarBalance = ref('0')
@@ -137,7 +143,7 @@ export const useStateStore = defineStore('state', () => {
         name: 'Reverted',
         message: 'Transaction Execution Reverted',
         data: {
-          approvalReceipt,
+          receipt: approvalReceipt,
         },
       }
     }
@@ -241,14 +247,28 @@ export const useStateStore = defineStore('state', () => {
     loader.message = ''
   }
 
-  function showError(message: string) {
+  function showError(message: string, transaction?: string) {
     error.show = true
     error.message = message
+    if (transaction) error.transaction = transaction
   }
 
   function hideError() {
     error.show = false
     error.message = ''
+    error.transaction = ''
+  }
+
+  function showSuccess(message: string, transaction?: string) {
+    success.show = true
+    success.message = message
+    if (transaction) success.transaction = transaction
+  }
+
+  function hideSuccess() {
+    success.show = false
+    success.message = ''
+    success.transaction = ''
   }
 
   return {
@@ -256,6 +276,7 @@ export const useStateStore = defineStore('state', () => {
     xarBalance: readonly(xarBalance),
     loader: readonly(loader),
     error: readonly(error),
+    success: readonly(success),
     depositAmount: readonly(depositAmount),
     depositUnlocked: readonly(depositUnlocked),
     withdrew: readonly(withdrew),
@@ -273,5 +294,7 @@ export const useStateStore = defineStore('state', () => {
     hideLoader,
     showError,
     hideError,
+    showSuccess,
+    hideSuccess,
   }
 })

@@ -5,7 +5,7 @@ import Decimal from 'decimal.js'
 import InfoCircleIcon from './icons/InfoCircleIcon.vue'
 import dayjs from 'dayjs'
 import { useStateStore } from '@/stores/state'
-import { deadlineTime, XARToAvailDivisor } from '@/utils/constants'
+import { deadlineTime, getTransactionUrl, XARToAvailDivisor } from '@/utils/constants'
 
 const state = useStateStore()
 const xarAmount = ref('0.00')
@@ -72,13 +72,22 @@ function handleInput(event: KeyboardEvent) {
 async function handleDeposit() {
   try {
     state.showLoader(`Depositing ${xarAmount.value} XAR...`)
-    await state.deposit(BigInt(new Decimal(xarAmount.value).mul(xarDecimals).floor().toFixed()))
+    const hash = await state.deposit(
+      BigInt(new Decimal(xarAmount.value).mul(xarDecimals).floor().toFixed()),
+    )
     xarAmount.value = '0.00'
     await state.fetchDetails()
+    state.showSuccess(`Deposited ${xarAmount.value} XAR Successfully`, getTransactionUrl(hash))
   } catch (e) {
     console.log('Error on Deposit', e)
-    // eslint-disable-next-line
-    state.showError((e as any).message)
+    state.showError(
+      'Transaction Execution Reverted',
+      // eslint-disable-next-line
+      (e as any)?.data?.receipt?.transactionHash
+        ? // eslint-disable-next-line
+          getTransactionUrl((e as any).data.receipt.transactionHash)
+        : undefined,
+    )
   } finally {
     state.hideLoader()
   }
