@@ -87,8 +87,10 @@ export const useStateStore = defineStore('state', () => {
         case 'CONNECT_SUCCESS': {
           showLoader('Fetching Details, Please Wait...')
           address.value = (await modal.value!.getAccount()?.address) || '0x'
-          isConnected.value = true
-          await fetchDetails()
+          if (address.value && address.value !== '0x') {
+            isConnected.value = true
+            await fetchDetails()
+          }
           hideLoader()
           return
         }
