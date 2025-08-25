@@ -103,6 +103,8 @@ async function handleDeposit() {
     await state.fetchDetails()
   } catch (e) {
     console.log('Error on Deposit', e)
+    // eslint-disable-next-line
+    state.showError((e as any).message)
   } finally {
     state.hideLoader()
   }
@@ -114,7 +116,7 @@ watch(availAmount, handleAVAILChange, { immediate: true })
 
 <template>
   <div class="card flex-col align-center" style="gap: 1rem">
-    <h2 class="text-center">Deposit Card</h2>
+    <h2 class="text-center">Deposit XAR</h2>
     <p class="text-center" style="font-size: var(--fs-16)">
       <span class="text-slate">Deposit your XAR token to initiate the conversion to AVAIL.</span>
       <br />

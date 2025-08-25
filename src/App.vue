@@ -5,6 +5,8 @@ import AppFooter from './components/AppFooter.vue'
 import AppHome from './components/AppHome.vue'
 import { useStateStore } from './stores/state'
 import AppLoader from './components/AppLoader.vue'
+import AppBanner from './components/AppBanner.vue'
+import AppError from './components/AppError.vue'
 
 const state = useStateStore()
 
@@ -17,13 +19,15 @@ state.initAppKit().then(() => {
   <main>
     <AppHeader />
     <div style="overflow-y: auto">
+      <AppBanner v-if="state.isConnected" />
       <div v-if="state.isConnected" style="min-height: 100%" class="flex-col justify-center">
         <AppHome />
       </div>
       <AppLogin v-else />
     </div>
     <AppFooter />
-    <AppLoader v-if="state.loader.loading"></AppLoader>
+    <AppLoader v-if="state.loader.loading" />
+    <AppError v-if="state.error.show" />
   </main>
 </template>
 

@@ -5,6 +5,7 @@
   --color-light-grey: #f5f6fb;
   --color-dark: #1d2a31;
   --color-blue: #3ca3fc;
+  --color-blue-fade: #457ae033;
   --color-red: #f61d1d;
   --color-green: #24ad29;
   --color-green-fade: #24ad2933;
@@ -32,6 +33,7 @@
   --fs-12: 0.75rem;
   --fs-14: 0.875rem;
   --fs-16: 1rem;
+  --fs-20: 1.25rem;
   --fs-24: 1.5rem;
   --fs-28: 1.75rem;
   --fs-32: 2rem;

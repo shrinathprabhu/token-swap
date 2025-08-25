@@ -9,10 +9,13 @@ const state = useStateStore()
 const xarDecimals = Decimal.pow(10, 18)
 
 const unlockTokens = computed(() => {
-  const tokensDeposited = state.depositAmout
-  const totalWithdrawable = Decimal.div(tokensDeposited, XARToAvailDivisor)
+  const totalWithdrawable = Decimal.div(state.depositAmount, XARToAvailDivisor)
   const halfValue = totalWithdrawable.div(2).floor().div(xarDecimals)
   return [halfValue.toFixed(), halfValue.toFixed()]
+})
+
+const depositAmount = computed(() => {
+  return Decimal.div(state.depositAmount, xarDecimals).toFixed()
 })
 
 const isUnlock1 = computed(() => {
@@ -26,30 +29,102 @@ const isUnlock1 = computed(() => {
 
 const isUnlock2 = computed(() => {
   if (state.depositUnlocked) {
-    return true
+    return false
   }
   const unlockPhase = dayjs('08-28-2026-00:00Z')
   const current = dayjs()
   return unlockPhase < current
 })
+
+async function handleWithdraw() {
+  try {
+    state.showLoader(`Withdrawing AVAIL...`)
+    await state.withdraw()
+    await state.fetchDetails()
+  } catch (e) {
+    console.log('Error on Withdraw', e)
+    // eslint-disable-next-line
+    state.showError((e as any).message)
+  } finally {
+    state.hideLoader()
+  }
+}
 </script>
 
 <template>
   <div id="app-withdraw" class="card flex-col align-center" style="gap: 1rem">
-    <h2 style="margin-bottom: 1.5rem">AVAIL Tokens</h2>
-    <div class="flex withdraw-card justify-between align-center">
-      <div class="flex-col">
-        <span class="text-light-slate">UNLOCK 1</span>
-        <span class="font-inter desc">{{ unlockTokens[0] }} AVAIL on Feb 28, 2026</span>
+    <h2 style="margin-bottom: 1.5rem">Withdrawal Schedule</h2>
+    <div
+      v-if="Number(depositAmount)"
+      class="flex withdraw-card justify-between align-center"
+      style="background-color: #eef0f8"
+    >
+      <span style="font-size: var(--fs-20); font-weight: 500">Total XAR Deposited</span>
+      <div class="flex align-center justify-center" style="gap: 0.5rem; font-weight: 500">
+        <img
+          src="../assets/images/xar-token.svg"
+          style="width: 2rem; height: 2rem; border-radius: 50%"
+        />
+        <span style="font-size: var(--fs-24)"
+          >{{ depositAmount }} <span style="font-size: var(--fs-16)">XAR</span></span
+        >
       </div>
-      <button class="button primary withdraw" :disabled="!isUnlock1">Withdraw</button>
     </div>
-    <div class="flex withdraw-card justify-between align-center">
-      <div class="flex-col">
-        <span class="text-light-slate">UNLOCK 2</span>
-        <span class="font-inter desc">{{ unlockTokens[1] }} AVAIL on Aug 28, 2026</span>
+    <div class="flex-col withdraw-card" style="gap: 1rem">
+      <div class="flex justify-between align-center">
+        <span :class="['text-light-slate', Number(state.depositAmount) ? 'deposited' : '']"
+          >Unlock 1</span
+        >
+        <div class="withdraw-chip" v-if="isUnlock1">Withdraw today</div>
+        <div class="withdraw-chip" v-else>
+          Withdraw on <span style="font-weight: 500">February 28, 2026</span>
+        </div>
       </div>
-      <button class="button primary withdraw" :disabled="!isUnlock2">Withdraw</button>
+      <div class="flex justify-between align-center">
+        <span style="font-size: var(--fs-20); font-weight: 500">Total AVAIL Allocated</span>
+        <div class="flex align-center justify-center" style="gap: 0.5rem; font-weight: 500">
+          <img
+            src="../assets/images/avail-token.svg"
+            style="width: 2rem; height: 2rem; border-radius: 50%"
+          />
+          <span style="font-size: var(--fs-24)"
+            >{{ unlockTokens[0] }} <span style="font-size: var(--fs-16)">XAR</span></span
+          >
+        </div>
+      </div>
+      <div v-if="Number(depositAmount)">
+        <button class="button primary withdraw" :disabled="!isUnlock1" @click.stop="handleWithdraw">
+          Withdraw
+        </button>
+      </div>
+    </div>
+    <div class="flex-col withdraw-card" style="gap: 1rem">
+      <div class="flex justify-between align-center">
+        <span :class="['text-light-slate', Number(state.depositAmount) ? 'deposited' : '']"
+          >Unlock 2</span
+        >
+        <div class="withdraw-chip" v-if="isUnlock2">Withdraw today</div>
+        <div class="withdraw-chip" v-else>
+          Withdraw on <span style="font-weight: 500">August 28, 2026</span>
+        </div>
+      </div>
+      <div class="flex justify-between align-center">
+        <span style="font-size: var(--fs-20); font-weight: 500">Total AVAIL Allocated</span>
+        <div class="flex align-center justify-center" style="gap: 0.5rem; font-weight: 500">
+          <img
+            src="../assets/images/avail-token.svg"
+            style="width: 2rem; height: 2rem; border-radius: 50%"
+          />
+          <span style="font-size: var(--fs-24)"
+            >{{ unlockTokens[1] }} <span style="font-size: var(--fs-16)">XAR</span></span
+          >
+        </div>
+      </div>
+      <div v-if="Number(depositAmount)">
+        <button class="button primary withdraw" :disabled="!isUnlock2" @click.stop="handleWithdraw">
+          Withdraw
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -58,14 +133,20 @@ const isUnlock2 = computed(() => {
 .withdraw-card {
   background-color: var(--color-light-card);
   width: 100%;
-  padding: 1.25rem 0.75rem;
+  padding: 1.25rem 1.25rem;
   border-radius: 0.75rem;
 }
 
 .text-light-slate {
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.5;
-  font-size: var(--fs-16);
+  font-size: var(--fs-24);
+  color: var(--color-dark);
+}
+
+.text-light-slate.deposited {
+  text-transform: uppercase;
+  font-weight: 700;
 }
 
 .desc {
@@ -76,6 +157,15 @@ const isUnlock2 = computed(() => {
 
 .button.withdraw {
   height: 3rem;
-  width: 8.625rem;
+  width: 100%;
+}
+
+.withdraw-chip {
+  background-color: var(--color-blue-fade);
+  color: var(--color-blue);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  font-size: var(--fs-16);
+  line-height: 1;
 }
 </style>

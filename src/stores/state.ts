@@ -7,12 +7,17 @@ import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { getPublicClient, getWalletClient, sepoliaRpcUrl, mainnetRpcUrl } from '@/utils/client'
 import { stakeContract, xarContract } from '@/utils/constants'
 import { stakeAbi, xarAbi } from '@/utils/abi'
+import Decimal from 'decimal.js'
 
 export const useStateStore = defineStore('state', () => {
   const isConnected = ref(false)
   const loader = reactive({
     loading: false,
     message: '',
+  })
+  const error = reactive({
+    message: '',
+    show: false,
   })
   const address = ref('0x' as `0x${string}`)
   const xarBalance = ref('0')
@@ -146,10 +151,26 @@ export const useStateStore = defineStore('state', () => {
       chain: sepolia,
       account: address.value,
     })
+    const pClient = getPublicClient()
+    const receipt = await pClient.waitForTransactionReceipt({
+      hash: response,
+    })
+    console.log('Deposit Response', response, receipt)
+    if (receipt.status === 'reverted') {
+      console.log('Reverting and throwing error')
+      throw {
+        name: 'Reverted',
+        message: 'Transaction Execution Reverted',
+        data: {
+          receipt,
+        },
+      }
+    }
     return response
   }
 
   async function getDeposits() {
+    console.log('getting deposits')
     const client = getPublicClient()
     const response = await client.readContract({
       address: stakeContract,
@@ -158,8 +179,10 @@ export const useStateStore = defineStore('state', () => {
       args: [address.value],
     })
     console.log('deposits', response)
-    depositAmount.value = response[0].toString()
-    depositUnlocked.value = response[1]
+    // depositAmount.value = response[0].toString()
+    // depositUnlocked.value = response[1]
+    depositUnlocked.value = true
+    depositAmount.value = new Decimal(10).mul(Decimal.pow(10, 18)).toFixed()
     return response
   }
 
@@ -181,11 +204,22 @@ export const useStateStore = defineStore('state', () => {
     loader.message = ''
   }
 
+  function showError(message: string) {
+    error.show = true
+    error.message = message
+  }
+
+  function hideError() {
+    error.show = false
+    error.message = ''
+  }
+
   return {
     isConnected: readonly(isConnected),
     xarBalance: readonly(xarBalance),
     loader: readonly(loader),
-    depositAmout: readonly(depositAmount),
+    error: readonly(error),
+    depositAmount: readonly(depositAmount),
     depositUnlocked: readonly(depositUnlocked),
     //
     connectWallet,
@@ -199,5 +233,7 @@ export const useStateStore = defineStore('state', () => {
     fetchDetails,
     showLoader,
     hideLoader,
+    showError,
+    hideError,
   }
 })
