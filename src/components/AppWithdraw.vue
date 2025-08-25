@@ -81,7 +81,7 @@ async function handleWithdraw(phase: number) {
           Withdraw on <span style="font-weight: 500">February 28, 2026</span>
         </div>
       </div>
-      <div class="flex justify-between align-center">
+      <div v-if="Number(depositAmount)" class="flex justify-between align-center">
         <span style="font-size: var(--fs-20); font-weight: 500">Total AVAIL Allocated</span>
         <div class="flex align-center justify-center" style="gap: 0.5rem; font-weight: 500">
           <img
@@ -122,7 +122,7 @@ async function handleWithdraw(phase: number) {
           Withdraw on <span style="font-weight: 500">August 28, 2026</span>
         </div>
       </div>
-      <div class="flex justify-between align-center">
+      <div v-if="Number(depositAmount)" class="flex justify-between align-center">
         <span style="font-size: var(--fs-20); font-weight: 500">Total AVAIL Allocated</span>
         <div class="flex align-center justify-center" style="gap: 0.5rem; font-weight: 500">
           <img
@@ -188,7 +188,7 @@ async function handleWithdraw(phase: number) {
 
 .withdraw-chip {
   background-color: var(--color-blue-fade);
-  color: var(--color-blue);
+  color: var(--color-alert-blue);
   border-radius: 0.5rem;
   padding: 0.5rem;
   font-size: var(--fs-16);
