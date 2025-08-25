@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useStateStore } from '@/stores/state'
-import { XARToAvailDivisor } from '@/utils/constants'
+import { getTransactionUrl, XARToAvailDivisor } from '@/utils/constants'
 import dayjs from 'dayjs'
 import Decimal from 'decimal.js'
 import { computed } from 'vue'
@@ -19,27 +19,27 @@ const depositAmount = computed(() => {
 })
 
 const isUnlock1 = computed(() => {
-  if (state.depositUnlocked) {
-    return true
-  }
+  // if (state.depositUnlocked) {
+  //   return true
+  // }
   const unlockPhase = dayjs('02-28-2026-00:00Z')
   const current = dayjs()
   return unlockPhase < current
 })
 
 const isUnlock2 = computed(() => {
-  if (state.depositUnlocked) {
-    return false
-  }
+  // if (state.depositUnlocked) {
+  //   return true
+  // }
   const unlockPhase = dayjs('08-28-2026-00:00Z')
   const current = dayjs()
   return unlockPhase < current
 })
 
-async function handleWithdraw() {
+async function handleWithdraw(phase: number) {
   try {
     state.showLoader(`Withdrawing AVAIL...`)
-    await state.withdraw()
+    await state.withdraw(phase)
     await state.fetchDetails()
   } catch (e) {
     console.log('Error on Withdraw', e)
@@ -75,7 +75,8 @@ async function handleWithdraw() {
         <span :class="['text-light-slate', Number(state.depositAmount) ? 'deposited' : '']"
           >Unlock 1</span
         >
-        <div class="withdraw-chip" v-if="isUnlock1">Withdraw today</div>
+        <div class="withdraw-chip green" v-if="state.withdrew[0]">Completed</div>
+        <div class="withdraw-chip" v-else-if="isUnlock1">Withdraw today</div>
         <div class="withdraw-chip" v-else>
           Withdraw on <span style="font-weight: 500">February 28, 2026</span>
         </div>
@@ -92,8 +93,20 @@ async function handleWithdraw() {
           >
         </div>
       </div>
-      <div v-if="Number(depositAmount)">
-        <button class="button primary withdraw" :disabled="!isUnlock1" @click.stop="handleWithdraw">
+      <div v-if="Number(depositAmount) || state.withdrew[0]">
+        <a
+          v-if="state.withdrew[0]"
+          target="_blank"
+          class="button secondary withdraw"
+          :href="getTransactionUrl(state.withdrew[0])"
+          >View Transaction</a
+        >
+        <button
+          v-else
+          class="button primary withdraw"
+          :disabled="!isUnlock1"
+          @click.stop="() => handleWithdraw(0)"
+        >
           Withdraw
         </button>
       </div>
@@ -103,7 +116,8 @@ async function handleWithdraw() {
         <span :class="['text-light-slate', Number(state.depositAmount) ? 'deposited' : '']"
           >Unlock 2</span
         >
-        <div class="withdraw-chip" v-if="isUnlock2">Withdraw today</div>
+        <div class="withdraw-chip green" v-if="state.withdrew[1]">Completed</div>
+        <div class="withdraw-chip" v-else-if="isUnlock2">Withdraw today</div>
         <div class="withdraw-chip" v-else>
           Withdraw on <span style="font-weight: 500">August 28, 2026</span>
         </div>
@@ -120,8 +134,20 @@ async function handleWithdraw() {
           >
         </div>
       </div>
-      <div v-if="Number(depositAmount)">
-        <button class="button primary withdraw" :disabled="!isUnlock2" @click.stop="handleWithdraw">
+      <div v-if="Number(depositAmount) || state.withdrew[1]">
+        <a
+          v-if="state.withdrew[1]"
+          target="_blank"
+          class="button secondary withdraw"
+          :href="getTransactionUrl(state.withdrew[1])"
+          >View Transaction</a
+        >
+        <button
+          v-else
+          class="button primary withdraw"
+          :disabled="!isUnlock2"
+          @click.stop="() => handleWithdraw(1)"
+        >
           Withdraw
         </button>
       </div>
@@ -167,5 +193,10 @@ async function handleWithdraw() {
   padding: 0.5rem;
   font-size: var(--fs-16);
   line-height: 1;
+}
+
+.withdraw-chip.green {
+  background-color: var(--color-green-fade);
+  color: var(--color-green);
 }
 </style>

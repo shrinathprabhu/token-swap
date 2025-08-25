@@ -23,6 +23,7 @@ export const useStateStore = defineStore('state', () => {
   const xarBalance = ref('0')
   const depositAmount = ref('0')
   const depositUnlocked = ref(false)
+  const withdrew = reactive(['', ''])
   const modal = ref<ReturnType<typeof createAppKit>>()
 
   async function initAppKit() {
@@ -142,7 +143,7 @@ export const useStateStore = defineStore('state', () => {
     return response
   }
 
-  async function withdraw() {
+  async function withdraw(phase: number) {
     const client = getWalletClient(address.value, modal.value!.getProvider('eip155')!)
     const response = await client.writeContract({
       address: stakeContract,
@@ -166,6 +167,8 @@ export const useStateStore = defineStore('state', () => {
         },
       }
     }
+    withdrew[phase] = response
+    localStorage.setItem(`withdrew-${address.value}`, JSON.stringify(withdrew))
     return response
   }
 
@@ -179,10 +182,10 @@ export const useStateStore = defineStore('state', () => {
       args: [address.value],
     })
     console.log('deposits', response)
-    // depositAmount.value = response[0].toString()
-    // depositUnlocked.value = response[1]
-    depositUnlocked.value = true
-    depositAmount.value = new Decimal(10).mul(Decimal.pow(10, 18)).toFixed()
+    depositAmount.value = response[0].toString()
+    depositUnlocked.value = response[1]
+    // depositUnlocked.value = true
+    // depositAmount.value = new Decimal(10).mul(Decimal.pow(10, 18)).toFixed()
     return response
   }
 
@@ -192,6 +195,17 @@ export const useStateStore = defineStore('state', () => {
     }
     if (address.value === '0x') return
     await Promise.all([fetchXARBalance(), getDeposits()])
+    const stored = localStorage.getItem(`withdrew-${address.value}`)
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        withdrew[0] = parsed[0]
+        withdrew[1] = parsed[1]
+      } finally {
+        //
+      }
+    }
+    // withdrew[0] = '0x2142a65032483d8d0946160050390839e3b31b3b098f67379f4072b894c23819'
   }
 
   function showLoader(message: string) {
@@ -221,6 +235,7 @@ export const useStateStore = defineStore('state', () => {
     error: readonly(error),
     depositAmount: readonly(depositAmount),
     depositUnlocked: readonly(depositUnlocked),
+    withdrew: readonly(withdrew),
     //
     connectWallet,
     disconnectWallet,
