@@ -8,7 +8,7 @@ import { getPublicClient, getWalletClient, sepoliaRpcUrl, mainnetRpcUrl } from '
 import { stakeContract, xarContract } from '@/utils/constants'
 import { stakeAbi, xarAbi } from '@/utils/abi'
 import Decimal from 'decimal.js'
-import { erc20Abi } from 'viem'
+import { erc20Abi, type TransactionReceipt } from 'viem'
 
 export const useStateStore = defineStore('state', () => {
   const isConnected = ref(false)
@@ -133,12 +133,18 @@ export const useStateStore = defineStore('state', () => {
       chain: sepolia,
       account: address.value,
     })
-    const approvalReceipt = await pClient.waitForTransactionReceipt({
-      hash: approval,
-    })
-    console.log('Approval Receipt', approval, approvalReceipt)
-    if (approvalReceipt.status === 'reverted') {
-      console.log('Reverting and throwing error')
+    let approvalReceipt: TransactionReceipt | null = null
+    try {
+      approvalReceipt = await pClient.waitForTransactionReceipt({
+        hash: approval,
+      })
+      console.log('Approval Receipt', approval, approvalReceipt)
+      if (approvalReceipt.status === 'reverted') {
+        console.log('Reverting and throwing error')
+        throw approvalReceipt
+      }
+    } catch (e) {
+      console.log(e)
       throw {
         name: 'Reverted',
         message: 'Transaction Execution Reverted',
@@ -155,12 +161,18 @@ export const useStateStore = defineStore('state', () => {
       chain: sepolia,
       account: address.value,
     })
-    const receipt = await pClient.waitForTransactionReceipt({
-      hash: response,
-    })
-    console.log('Deposit Response', response, receipt)
-    if (receipt.status === 'reverted') {
-      console.log('Reverting and throwing error')
+    let receipt: TransactionReceipt | null = null
+    try {
+      receipt = await pClient.waitForTransactionReceipt({
+        hash: response,
+      })
+      console.log('Deposit Response', response, receipt)
+      if (receipt.status === 'reverted') {
+        console.log('Reverting and throwing error')
+        throw receipt
+      }
+    } catch (e) {
+      console.log(e)
       throw {
         name: 'Reverted',
         message: 'Transaction Execution Reverted',
@@ -182,12 +194,18 @@ export const useStateStore = defineStore('state', () => {
       account: address.value,
     })
     const pClient = getPublicClient()
-    const receipt = await pClient.waitForTransactionReceipt({
-      hash: response,
-    })
-    console.log('Deposit Response', response, receipt)
-    if (receipt.status === 'reverted') {
-      console.log('Reverting and throwing error')
+    let receipt: TransactionReceipt | null = null
+    try {
+      receipt = await pClient.waitForTransactionReceipt({
+        hash: response,
+      })
+      console.log('Deposit Response', response, receipt)
+      if (receipt.status === 'reverted') {
+        console.log('Reverting and throwing error')
+        throw receipt
+      }
+    } catch (e) {
+      console.log(e)
       throw {
         name: 'Reverted',
         message: 'Transaction Execution Reverted',
