@@ -1,15 +1,19 @@
-import { ref, readonly } from 'vue'
+import { ref, readonly, reactive } from 'vue'
 import { defineStore } from 'pinia'
 
 import { createAppKit } from '@reown/appkit/vue'
 import { mainnet, sepolia, type AppKitNetwork } from '@reown/appkit/networks'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { getPublicClient, getWalletClient } from '@/utils/client'
+import { getPublicClient, getWalletClient, sepoliaRpcUrl, mainnetRpcUrl } from '@/utils/client'
 import { stakeContract, xarContract } from '@/utils/constants'
 import { stakeAbi, xarAbi } from '@/utils/abi'
 
 export const useStateStore = defineStore('state', () => {
   const isConnected = ref(false)
+  const loader = reactive({
+    loading: false,
+    message: '',
+  })
   const address = ref('0x' as `0x${string}`)
   const xarBalance = ref('0')
   const depositAmount = ref('0')
@@ -31,6 +35,10 @@ export const useStateStore = defineStore('state', () => {
     const wagmiAdapter = new WagmiAdapter({
       networks,
       projectId,
+      customRpcUrls: {
+        'eip155:11155111': [{ url: sepoliaRpcUrl }],
+        'eip155:1': [{ url: mainnetRpcUrl }],
+      },
     })
 
     modal.value = createAppKit({
@@ -47,23 +55,28 @@ export const useStateStore = defineStore('state', () => {
   async function checkSavedConnection() {
     const account = modal.value?.getAccount()
     if (account?.address) {
+      showLoader('Fetching Details, Please Wait...')
       address.value = account.address
       isConnected.value = true
+      hideLoader()
       await fetchDetails()
     }
     console.log(account)
     modal.value?.subscribeEvents(async (ev) => {
+      console.log('Web3Modal Events', ev)
       switch (ev.data.event) {
         case 'DISCONNECT_SUCCESS': {
           localStorage.clear()
           isConnected.value = false
           return
         }
+        case 'INITIALIZE':
         case 'CONNECT_SUCCESS': {
-          address.value =
-            (ev.data.address as `0x${string}`) || (await modal.value!.getAccount())?.address || '0x'
+          showLoader('Fetching Details, Please Wait...')
+          address.value = (await modal.value!.getAccount()?.address) || '0x'
           isConnected.value = true
           await fetchDetails()
+          hideLoader()
           return
         }
         default:
@@ -84,6 +97,7 @@ export const useStateStore = defineStore('state', () => {
 
   async function fetchXARBalance() {
     const client = getPublicClient()
+    console.log('Params', address.value)
     const balance = await client.readContract({
       address: xarContract,
       abi: xarAbi,
@@ -95,7 +109,8 @@ export const useStateStore = defineStore('state', () => {
   }
 
   async function deposit(amount: bigint) {
-    const client = getWalletClient(address.value)
+    const client = getWalletClient(address.value, modal.value!.getProvider('eip155')!)
+    console.log('Deposit', amount)
     const response = await client.writeContract({
       address: stakeContract,
       abi: stakeAbi,
@@ -104,11 +119,26 @@ export const useStateStore = defineStore('state', () => {
       chain: sepolia,
       account: address.value,
     })
+    const pClient = getPublicClient()
+    const receipt = await pClient.waitForTransactionReceipt({
+      hash: response,
+    })
+    console.log('Deposit Response', response, receipt)
+    if (receipt.status === 'reverted') {
+      console.log('Reverting and throwing error')
+      throw {
+        name: 'Reverted',
+        message: 'Transaction Execution Reverted',
+        data: {
+          receipt,
+        },
+      }
+    }
     return response
   }
 
   async function withdraw() {
-    const client = getWalletClient(address.value)
+    const client = getWalletClient(address.value, modal.value!.getProvider('eip155')!)
     const response = await client.writeContract({
       address: stakeContract,
       abi: stakeAbi,
@@ -127,18 +157,36 @@ export const useStateStore = defineStore('state', () => {
       functionName: 'deposits',
       args: [address.value],
     })
+    console.log('deposits', response)
     depositAmount.value = response[0].toString()
     depositUnlocked.value = response[1]
     return response
   }
 
   async function fetchDetails() {
+    if (address.value === '0x') {
+      address.value = (await modal.value?.getAccount())?.address || '0x'
+    }
+    if (address.value === '0x') return
     await Promise.all([fetchXARBalance(), getDeposits()])
+  }
+
+  function showLoader(message: string) {
+    loader.loading = true
+    loader.message = message
+  }
+
+  function hideLoader() {
+    loader.loading = false
+    loader.message = ''
   }
 
   return {
     isConnected: readonly(isConnected),
     xarBalance: readonly(xarBalance),
+    loader: readonly(loader),
+    depositAmout: readonly(depositAmount),
+    depositUnlocked: readonly(depositUnlocked),
     //
     connectWallet,
     disconnectWallet,
@@ -149,5 +197,7 @@ export const useStateStore = defineStore('state', () => {
     withdraw,
     getDeposits,
     fetchDetails,
+    showLoader,
+    hideLoader,
   }
 })

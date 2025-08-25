@@ -2,6 +2,7 @@ import {
   createPublicClient,
   createWalletClient,
   http,
+  custom,
   type PublicClient,
   type WalletClient,
 } from 'viem'
@@ -10,23 +11,27 @@ import { sepolia } from 'viem/chains'
 let publicClient: PublicClient
 let walletClient: WalletClient
 
-const rpcUrl = 'https://1rpc.io/sepolia'
+export const sepoliaRpcUrl = 'https://1rpc.io/sepolia'
+export const mainnetRpcUrl = 'https://eth.drpc.org'
 
 export function getPublicClient() {
   if (publicClient) return publicClient
   publicClient = createPublicClient({
     chain: sepolia,
-    transport: http(rpcUrl),
+    transport: http(sepoliaRpcUrl),
   })
   return publicClient
 }
 
-export function getWalletClient(account: `0x${string}`) {
+// eslint-disable-next-line
+type EthereumProvider = { request(...args: any): Promise<any> }
+
+export function getWalletClient(account: `0x${string}`, provider: EthereumProvider) {
   if (walletClient) return walletClient
   walletClient = createWalletClient({
     account,
     chain: sepolia,
-    transport: http(rpcUrl),
+    transport: custom(provider),
   })
   return walletClient
 }

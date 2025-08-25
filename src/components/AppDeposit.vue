@@ -5,6 +5,7 @@ import Decimal from 'decimal.js'
 import InfoCircleIcon from './icons/InfoCircleIcon.vue'
 import dayjs from 'dayjs'
 import { useStateStore } from '@/stores/state'
+import { XARToAvailDivisor } from '@/utils/constants'
 
 const state = useStateStore()
 const xarAmount = ref('0.00')
@@ -12,8 +13,6 @@ const xarDecimals = Decimal.pow(10, 18)
 const xarAvailable = computed(() => new Decimal(state.xarBalance).div(xarDecimals).toFixed())
 const inputXar = ref<HTMLInputElement | null>()
 const inputAvail = ref<HTMLInputElement | null>()
-const unlock1Tokens = ref('0.0')
-const unlock2Tokens = ref('0.0')
 
 const isSimulated = reactive({
   expired: false,
@@ -48,7 +47,7 @@ window.simulateUnlock = function (num = 1, revert = false) {
 
 const availAmount = computed(() => {
   if (!xarAmount.value) return '0'
-  return Decimal.div(xarAmount.value, 4).toFixed()
+  return Decimal.div(xarAmount.value, XARToAvailDivisor).toFixed()
 })
 
 const isDeadlineNear = computed(() => {
@@ -63,24 +62,6 @@ const isDeadlineOver = computed(() => {
     return true
   }
   return dayjs('02-28-2026-00:00Z') < dayjs()
-})
-
-const isUnlock1 = computed(() => {
-  if (isSimulated.unlock1) {
-    return true
-  }
-  const unlockPhase = dayjs('02-28-2026-00:00Z')
-  const current = dayjs()
-  return unlockPhase < current
-})
-
-const isUnlock2 = computed(() => {
-  if (isSimulated.unlock2) {
-    return true
-  }
-  const unlockPhase = dayjs('08-28-2026-00:00Z')
-  const current = dayjs()
-  return unlockPhase < current
 })
 
 function handleXARChange() {
@@ -115,8 +96,16 @@ function handleInput(event: KeyboardEvent) {
 }
 
 async function handleDeposit() {
-  await state.deposit(BigInt(new Decimal(xarAmount.value).mul(xarDecimals).floor().toString()))
-  xarAmount.value = '0.00'
+  try {
+    state.showLoader(`Depositing ${xarAmount.value} XAR...`)
+    await state.deposit(BigInt(new Decimal(xarAmount.value).mul(xarDecimals).floor().toFixed()))
+    xarAmount.value = '0.00'
+    await state.fetchDetails()
+  } catch (e) {
+    console.log('Error on Deposit', e)
+  } finally {
+    state.hideLoader()
+  }
 }
 
 watch(xarAmount, handleXARChange, { immediate: true })
@@ -124,120 +113,97 @@ watch(availAmount, handleAVAILChange, { immediate: true })
 </script>
 
 <template>
-  <div id="app-deposit" class="center-column">
-    <div v-if="!isDeadlineOver" class="card flex-col align-center" style="gap: 1rem">
-      <h2 class="text-center">Deposit Card</h2>
-      <p class="text-center" style="font-size: var(--fs-16)">
-        <span class="text-slate">Deposit your XAR token to initiate the conversion to AVAIL.</span>
-        <br />
-        <span class="text-slate" style="font-weight: 600">4 XAR = 1 AVAIL</span>
-      </p>
-      <form @submit.prevent="" class="flex-col" style="gap: 1rem">
-        <div class="font-inter">
-          <label for="xar-amt">Enter Deposit Amount</label>
-          <div class="text-input justify-between">
-            <div class="flex align-center">
-              <img class="token-img" src="../assets/images/xar-token.svg" />
-              <input
-                id="xar-amt"
-                ref="inputXar"
-                type="text"
-                pattern="[0-9]*\.?[0-9]+"
-                v-model="xarAmount"
-                style="width: 4rem"
-                @keypress="handleInput"
-                @focusout="!xarAmount && (xarAmount = '0.00')"
-              />
-              <span class="token">XAR</span>
-            </div>
-            <div class="flex align-center">
-              <div class="separator"></div>
-              <button
-                type="button"
-                class="max-button flex justify-center align-center"
-                @click.stop="xarAmount = xarAvailable"
-              >
-                <ArrowUpIcon />
-                <span>MAX</span>
-              </button>
-            </div>
-          </div>
-          <div class="flex align-center justify-between message-container" style="margin-top: 2px">
-            <div>
-              <span class="error-message">Insufficient Balance</span>
-            </div>
-            <span style="font-weight: 500; font-size: var(--fs-12); text-align: right"
-              >XAR Available: {{ xarAvailable }}</span
-            >
-          </div>
-        </div>
-        <div class="font-inter">
-          <label for="avail-amt">You Will Receive</label>
-          <div
-            class="text-input"
-            :class="{
-              disabled:
-                !xarAmount || new Decimal(xarAmount || 0).equals(0) || !inputXar?.validity.valid,
-            }"
-          >
-            <img class="token-img" src="../assets/images/avail-token.svg" />
+  <div class="card flex-col align-center" style="gap: 1rem">
+    <h2 class="text-center">Deposit Card</h2>
+    <p class="text-center" style="font-size: var(--fs-16)">
+      <span class="text-slate">Deposit your XAR token to initiate the conversion to AVAIL.</span>
+      <br />
+      <span class="text-slate" style="font-weight: 600">4 XAR = 1 AVAIL</span>
+    </p>
+    <form @submit.prevent="" class="flex-col" style="gap: 1rem">
+      <div class="font-inter">
+        <label for="xar-amt">Enter Deposit Amount</label>
+        <div class="text-input justify-between">
+          <div class="flex align-center">
+            <img class="token-img" src="../assets/images/xar-token.svg" />
             <input
-              id="avail-amt"
-              style="width: 2rem"
-              ref="inputAvail"
+              id="xar-amt"
+              ref="inputXar"
               type="text"
-              readonly
-              v-model="availAmount"
+              pattern="[0-9]*\.?[0-9]+"
+              v-model="xarAmount"
+              style="width: 4rem"
+              @keypress="handleInput"
+              @focusout="!xarAmount && (xarAmount = '0.00')"
             />
-            <span class="token">AVAIL</span>
+            <span class="token">XAR</span>
+          </div>
+          <div class="flex align-center">
+            <div class="separator"></div>
+            <button
+              type="button"
+              class="max-button flex justify-center align-center"
+              @click.stop="xarAmount = xarAvailable"
+            >
+              <ArrowUpIcon />
+              <span>MAX</span>
+            </button>
           </div>
         </div>
-        <div class="alert-chip" :class="{ blue: !isDeadlineNear, orange: isDeadlineNear }">
-          <InfoCircleIcon style="height: 1.25rem; width: 1.25rem" />
-          <span
-            >The final deadline for deposit is February 28, 2026. No deposits will be accepted after
-            this date.</span
+        <div class="flex align-center justify-between message-container" style="margin-top: 2px">
+          <div>
+            <span class="error-message">Insufficient Balance</span>
+          </div>
+          <span style="font-weight: 500; font-size: var(--fs-12); text-align: right"
+            >XAR Available: {{ xarAvailable }}</span
           >
         </div>
-        <button
-          class="button primary"
-          :disabled="
-            !xarAmount ||
-            new Decimal(xarAmount || 0).equals(0) ||
-            new Decimal(xarAmount || 0).greaterThan(xarAvailable || 0) ||
-            isDeadlineOver
-          "
-          @click.stop="handleDeposit"
+      </div>
+      <div class="font-inter">
+        <label for="avail-amt">You Will Receive</label>
+        <div
+          class="text-input"
+          :class="{
+            disabled:
+              !xarAmount || new Decimal(xarAmount || 0).equals(0) || !inputXar?.validity.valid,
+          }"
         >
-          Deposit
-        </button>
-      </form>
-    </div>
-    <div class="card flex-col align-center" style="gap: 1rem">
-      <h2 style="margin-bottom: 1.5rem">AVAIL Tokens</h2>
-      <div class="flex withdraw-card justify-between align-center">
-        <div class="flex-col">
-          <span class="text-light-slate">UNLOCK 1</span>
-          <span class="font-inter desc">{{ unlock1Tokens }} AVAIL on Feb 28, 2026</span>
+          <img class="token-img" src="../assets/images/avail-token.svg" />
+          <input
+            id="avail-amt"
+            style="width: 2rem"
+            ref="inputAvail"
+            type="text"
+            readonly
+            v-model="availAmount"
+          />
+          <span class="token">AVAIL</span>
         </div>
-        <button class="button primary withdraw" :disabled="!isUnlock1">Withdraw</button>
       </div>
-      <div class="flex withdraw-card justify-between align-center">
-        <div class="flex-col">
-          <span class="text-light-slate">UNLOCK 2</span>
-          <span class="font-inter desc">{{ unlock2Tokens }} AVAIL on Aug 28, 2026</span>
-        </div>
-        <button class="button primary withdraw" :disabled="!isUnlock2">Withdraw</button>
+      <div class="alert-chip" :class="{ blue: !isDeadlineNear, orange: isDeadlineNear }">
+        <InfoCircleIcon style="height: 1.25rem; width: 1.25rem" />
+        <span
+          >The final deadline for deposit is February 28, 2026. No deposits will be accepted after
+          this date.</span
+        >
       </div>
-    </div>
+      <button
+        class="button primary"
+        :disabled="
+          !xarAmount ||
+          new Decimal(xarAmount || 0).equals(0) ||
+          new Decimal(xarAmount || 0).greaterThan(xarAvailable || 0) ||
+          isDeadlineOver
+        "
+        @click.stop="handleDeposit"
+      >
+        Deposit
+      </button>
+    </form>
   </div>
 </template>
 
 <style lang="css" scoped>
-.center-column {
-  padding-block: 1.5rem;
-}
-
 .card {
   padding: 2rem;
 }
@@ -292,30 +258,6 @@ input {
   font-size: var(--fs-12);
   font-weight: 500;
   gap: 0.75rem;
-}
-
-.withdraw-card {
-  background-color: var(--color-light-card);
-  width: 100%;
-  padding: 1.25rem 0.75rem;
-  border-radius: 0.75rem;
-}
-
-.text-light-slate {
-  font-weight: 600;
-  line-height: 1.5;
-  font-size: var(--fs-16);
-}
-
-.desc {
-  line-height: 1.5;
-  font-size: var(--fs-24);
-  font-weight: 500;
-}
-
-.button.withdraw {
-  height: 3rem;
-  width: 8.625rem;
 }
 
 .text-input.disabled {
