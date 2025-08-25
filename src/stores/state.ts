@@ -8,6 +8,7 @@ import { getPublicClient, getWalletClient, sepoliaRpcUrl, mainnetRpcUrl } from '
 import { stakeContract, xarContract } from '@/utils/constants'
 import { stakeAbi, xarAbi } from '@/utils/abi'
 import Decimal from 'decimal.js'
+import { erc20Abi } from 'viem'
 
 export const useStateStore = defineStore('state', () => {
   const isConnected = ref(false)
@@ -116,7 +117,30 @@ export const useStateStore = defineStore('state', () => {
 
   async function deposit(amount: bigint) {
     const client = getWalletClient(address.value, modal.value!.getProvider('eip155')!)
+    const pClient = getPublicClient()
     console.log('Deposit', amount)
+    const approval = await client.writeContract({
+      address: xarContract,
+      abi: erc20Abi,
+      functionName: 'approve',
+      args: [stakeContract, amount],
+      chain: sepolia,
+      account: address.value,
+    })
+    const approvalReceipt = await pClient.waitForTransactionReceipt({
+      hash: approval,
+    })
+    console.log('Approval Receipt', approval, approvalReceipt)
+    if (approvalReceipt.status === 'reverted') {
+      console.log('Reverting and throwing error')
+      throw {
+        name: 'Reverted',
+        message: 'Transaction Execution Reverted',
+        data: {
+          approvalReceipt,
+        },
+      }
+    }
     const response = await client.writeContract({
       address: stakeContract,
       abi: stakeAbi,
@@ -125,7 +149,6 @@ export const useStateStore = defineStore('state', () => {
       chain: sepolia,
       account: address.value,
     })
-    const pClient = getPublicClient()
     const receipt = await pClient.waitForTransactionReceipt({
       hash: response,
     })
