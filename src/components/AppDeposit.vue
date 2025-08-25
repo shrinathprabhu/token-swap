@@ -75,9 +75,9 @@ async function handleDeposit() {
     const hash = await state.deposit(
       BigInt(new Decimal(xarAmount.value).mul(xarDecimals).floor().toFixed()),
     )
-    xarAmount.value = '0.00'
     await state.fetchDetails()
-    state.showSuccess(`Deposited ${xarAmount.value} XAR Successfully`, getTransactionUrl(hash))
+    state.showSuccess(`Deposited XAR Successfully`, getTransactionUrl(hash))
+    xarAmount.value = '0.00'
   } catch (e) {
     console.log('Error on Deposit', e)
     state.showError(
