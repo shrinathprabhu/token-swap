@@ -80,6 +80,21 @@ export const useStateStore = defineStore('state', () => {
       console.log('Web3Modal Events', ev)
       switch (ev.data.event) {
         case 'DISCONNECT_SUCCESS': {
+          ;[
+            '@appkit/active_caip_network_id',
+            '@appkit/active_namespace',
+            '@appkit/connected_namespaces',
+            '@appkit/connection_status',
+            '@appkit/connections',
+            '@appkit/disconnected_connector_ids',
+            '@appkit/eip155:connected_connector_id',
+            '@appkit/native_balance_cache',
+            '@appkit/portfolio_cache',
+            'cbwsdk.store',
+            'wagmi.recentConnectorId',
+            'wagmi.store',
+          ].forEach((key) => localStorage.removeItem(key))
+          window.location.reload()
           isConnected.value = false
           return
         }
