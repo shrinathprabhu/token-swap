@@ -10,6 +10,10 @@ const xarDecimals = Decimal.pow(10, 18)
 
 const unlockTokens = computed(() => {
   const totalWithdrawable = Decimal.div(state.depositAmount, XARToAvailDivisor)
+  const hasWithdrawn = localStorage.getItem(`withdraw-amount-${state.address.toLowerCase()}`)
+  if (hasWithdrawn) {
+    return [hasWithdrawn, hasWithdrawn]
+  }
   if (state.depositUnlocked) {
     const value = totalWithdrawable.div(xarDecimals)
     return [value.toFixed(), value.toFixed()]
@@ -32,6 +36,9 @@ async function handleWithdraw(phase: number) {
     const res = await state.withdraw(phase)
     await state.fetchDetails()
     state.showSuccess(`Withdraw Success`, getTransactionUrl(res))
+    if (phase === 1) {
+      localStorage.setItem(`withdraw-amount-${state.address.toLowerCase()}`, unlockTokens.value[1])
+    }
   } catch (e) {
     console.log('Error on Withdraw', e)
     state.showError(

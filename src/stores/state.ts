@@ -79,7 +79,6 @@ export const useStateStore = defineStore('state', () => {
       console.log('Web3Modal Events', ev)
       switch (ev.data.event) {
         case 'DISCONNECT_SUCCESS': {
-          localStorage.clear()
           isConnected.value = false
           return
         }
@@ -105,7 +104,6 @@ export const useStateStore = defineStore('state', () => {
   }
 
   async function disconnectWallet() {
-    localStorage.clear()
     await modal.value?.disconnect()
     isConnected.value = false
   }
@@ -217,7 +215,7 @@ export const useStateStore = defineStore('state', () => {
       }
     }
     withdrew[phase] = response
-    localStorage.setItem(`withdrew-${address.value}`, JSON.stringify(withdrew))
+    localStorage.setItem(`withdrew-${address.value.toLowerCase()}`, JSON.stringify(withdrew))
     return response
   }
 
@@ -244,7 +242,7 @@ export const useStateStore = defineStore('state', () => {
     }
     if (address.value === '0x') return
     await Promise.all([fetchXARBalance(), getDeposits()])
-    const stored = localStorage.getItem(`withdrew-${address.value}`)
+    const stored = localStorage.getItem(`withdrew-${address.value.toLowerCase()}`)
     if (stored) {
       try {
         const parsed = JSON.parse(stored)
@@ -300,6 +298,7 @@ export const useStateStore = defineStore('state', () => {
     depositAmount: readonly(depositAmount),
     depositUnlocked: readonly(depositUnlocked),
     withdrew: readonly(withdrew),
+    address: readonly(address),
     //
     connectWallet,
     disconnectWallet,
