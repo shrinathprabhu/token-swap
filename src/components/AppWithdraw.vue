@@ -10,6 +10,10 @@ const xarDecimals = Decimal.pow(10, 18)
 
 const unlockTokens = computed(() => {
   const totalWithdrawable = Decimal.div(state.depositAmount, XARToAvailDivisor)
+  if (state.depositUnlocked) {
+    const value = totalWithdrawable.div(xarDecimals)
+    return [value.toFixed(), value.toFixed()]
+  }
   const halfValue = totalWithdrawable.div(2).floor().div(xarDecimals)
   return [halfValue.toFixed(), halfValue.toFixed()]
 })
