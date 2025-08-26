@@ -107,7 +107,22 @@ export const useStateStore = defineStore('state', () => {
   async function disconnectWallet() {
     await modal.value?.disconnect('eip155')
     await disconnect({ namespace: 'eip155' })
+    ;[
+      '@appkit/active_caip_network_id',
+      '@appkit/active_namespace',
+      '@appkit/connected_namespaces',
+      '@appkit/connection_status',
+      '@appkit/connections',
+      '@appkit/disconnected_connector_ids',
+      '@appkit/eip155:connected_connector_id',
+      '@appkit/native_balance_cache',
+      '@appkit/portfolio_cache',
+      'cbwsdk.store',
+      'wagmi.recentConnectorId',
+      'wagmi.store',
+    ].forEach((key) => localStorage.removeItem(key))
     isConnected.value = false
+    window.location.reload()
   }
 
   async function fetchXARBalance() {
