@@ -1,7 +1,7 @@
 import { ref, readonly, reactive } from 'vue'
 import { defineStore } from 'pinia'
 
-import { createAppKit } from '@reown/appkit/vue'
+import { createAppKit, useDisconnect } from '@reown/appkit/vue'
 import { mainnet, sepolia, type AppKitNetwork } from '@reown/appkit/networks'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
 import { getPublicClient, getWalletClient, sepoliaRpcUrl, mainnetRpcUrl } from '@/utils/client'
@@ -32,6 +32,7 @@ export const useStateStore = defineStore('state', () => {
   const depositUnlocked = ref(false)
   const withdrew = reactive(['', ''])
   const modal = ref<ReturnType<typeof createAppKit>>()
+  const { disconnect } = useDisconnect()
 
   async function initAppKit() {
     const projectId = import.meta.env.VITE_APP_REOWN_PROJECT_ID
@@ -104,7 +105,8 @@ export const useStateStore = defineStore('state', () => {
   }
 
   async function disconnectWallet() {
-    await modal.value?.disconnect()
+    await modal.value?.disconnect('eip155')
+    await disconnect({ namespace: 'eip155' })
     isConnected.value = false
   }
 
