@@ -2,12 +2,11 @@ import { ref, readonly, reactive } from 'vue'
 import { defineStore } from 'pinia'
 
 import { createAppKit, useDisconnect } from '@reown/appkit/vue'
-import { mainnet, sepolia, type AppKitNetwork } from '@reown/appkit/networks'
+import { mainnet, type AppKitNetwork } from '@reown/appkit/networks'
 import { WagmiAdapter } from '@reown/appkit-adapter-wagmi'
-import { getPublicClient, getWalletClient, sepoliaRpcUrl, mainnetRpcUrl } from '@/utils/client'
+import { getPublicClient, getWalletClient, mainnetRpcUrl } from '@/utils/client'
 import { stakeContract, xarContract } from '@/utils/constants'
 import { stakeAbi, xarAbi } from '@/utils/abi'
-import Decimal from 'decimal.js'
 import { erc20Abi, type TransactionReceipt } from 'viem'
 
 export const useStateStore = defineStore('state', () => {
@@ -47,13 +46,12 @@ export const useStateStore = defineStore('state', () => {
       icons: ['https://www.availproject.org/favicon.ico'],
     }
 
-    const networks: [AppKitNetwork, ...AppKitNetwork[]] = [sepolia]
+    const networks: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet]
 
     const wagmiAdapter = new WagmiAdapter({
       networks,
       projectId,
       customRpcUrls: {
-        'eip155:11155111': [{ url: sepoliaRpcUrl }],
         'eip155:1': [{ url: mainnetRpcUrl }],
       },
     })
@@ -165,7 +163,7 @@ export const useStateStore = defineStore('state', () => {
       abi: erc20Abi,
       functionName: 'approve',
       args: [stakeContract, amount],
-      chain: sepolia,
+      chain: mainnet,
       account: address.value,
     })
     let approvalReceipt: TransactionReceipt | null = null
@@ -193,7 +191,7 @@ export const useStateStore = defineStore('state', () => {
       abi: stakeAbi,
       functionName: 'deposit',
       args: [amount],
-      chain: sepolia,
+      chain: mainnet,
       account: address.value,
     })
     let receipt: TransactionReceipt | null = null
@@ -225,7 +223,7 @@ export const useStateStore = defineStore('state', () => {
       address: stakeContract,
       abi: stakeAbi,
       functionName: 'withdraw',
-      chain: sepolia,
+      chain: mainnet,
       account: address.value,
     })
     const pClient = getPublicClient()

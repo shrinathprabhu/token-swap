@@ -6,19 +6,18 @@ import {
   type PublicClient,
   type WalletClient,
 } from 'viem'
-import { sepolia } from 'viem/chains'
+import { mainnet } from 'viem/chains'
 
 let publicClient: PublicClient
 let walletClient: WalletClient
 
-export const sepoliaRpcUrl = 'https://ethereum-sepolia-rpc.publicnode.com'
 export const mainnetRpcUrl = 'https://ethereum-rpc.publicnode.com'
 
 export function getPublicClient() {
   if (publicClient) return publicClient
   publicClient = createPublicClient({
-    chain: sepolia,
-    transport: http(sepoliaRpcUrl),
+    chain: mainnet,
+    transport: http(mainnetRpcUrl),
   })
   return publicClient
 }
@@ -30,7 +29,7 @@ export function getWalletClient(account: `0x${string}`, provider: EthereumProvid
   if (walletClient) return walletClient
   walletClient = createWalletClient({
     account,
-    chain: sepolia,
+    chain: mainnet,
     transport: custom(provider),
   })
   return walletClient
