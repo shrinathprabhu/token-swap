@@ -94,7 +94,7 @@ async function handleWithdraw(phase: number) {
             style="width: 2rem; height: 2rem; border-radius: 50%"
           />
           <span style="font-size: var(--fs-24)"
-            >{{ unlockTokens[0] }} <span style="font-size: var(--fs-16)">XAR</span></span
+            >{{ unlockTokens[0] }} <span style="font-size: var(--fs-16)">AVAIL</span></span
           >
         </div>
       </div>
@@ -136,7 +136,7 @@ async function handleWithdraw(phase: number) {
             style="width: 2rem; height: 2rem; border-radius: 50%"
           />
           <span style="font-size: var(--fs-24)"
-            >{{ unlockTokens[1] }} <span style="font-size: var(--fs-16)">XAR</span></span
+            >{{ unlockTokens[1] }} <span style="font-size: var(--fs-16)">AVAIL</span></span
           >
         </div>
       </div>
