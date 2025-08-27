@@ -12,6 +12,6 @@ export function getTransactionUrl(txHash: string) {
   return new URL(`/tx/${txHash}`, explorerUrl).href
 }
 
-export const deadlineTime = dayjs('2026-02-08T00:00:00.000Z')
+export const deadlineTime = dayjs('2026-02-27T00:00:00.000Z')
 export const unlock1Time = dayjs('2026-02-28T00:00:00.000Z')
 export const unlock2Time = dayjs('2026-08-28T00:00:00.000Z')
