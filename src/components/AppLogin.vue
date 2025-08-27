@@ -20,14 +20,22 @@ async function handleConnect() {
       <button class="button primary" @click.stop="handleConnect">Connect Wallet</button>
     </div>
     <div class="card news">
-      <img style="height: 6.875rem; width: 10rem" class="img" />
+      <img
+        style="height: 6.875rem; width: 10rem"
+        class="img"
+        src="../assets/images/acquisition-xar-avail.jpg"
+      />
       <div class="content flex-col">
-        <div class="title">Avacquisition</div>
-        <div class="description">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-        </div>
+        <div class="title">Announcement</div>
+        <div class="description">Avail Acquires Arcana To Accelerate Multichain Scalability</div>
       </div>
-      <a href="#" class="button secondary" style="cursor: pointer">View Now</a>
+      <a
+        href="https://blog.availproject.org/avail-acquires-arcana-to-accelerate-multichain-scalability/"
+        target="_blank"
+        class="button secondary"
+        style="cursor: pointer"
+        >View Now</a
+      >
     </div>
   </div>
 </template>

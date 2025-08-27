@@ -168,8 +168,8 @@ watch(availAmount, handleAVAILChange, { immediate: true })
       <div class="alert-chip" :class="{ blue: !isDeadlineNear, orange: isDeadlineNear }">
         <InfoCircleIcon style="height: 1.25rem; width: 1.25rem" />
         <span
-          >The final deadline for deposit is {{ deadlineTime.format('MMMM DD, YYYY') }}. No deposits
-          will be accepted after this date.</span
+          >The deadline for deposit is {{ deadlineTime.format('MMM DD, YYYY') }}. No deposits will
+          be accepted after this date.</span
         >
       </div>
       <button

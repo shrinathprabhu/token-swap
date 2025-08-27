@@ -33,6 +33,9 @@ export const useStateStore = defineStore('state', () => {
   const withdrew = reactive(['', ''])
   const modal = ref<ReturnType<typeof createAppKit>>()
   const { disconnect } = useDisconnect()
+  const showBanner = ref(true)
+
+  showBanner.value = localStorage.getItem('banner-status') ? false : true
 
   async function initAppKit() {
     const projectId = import.meta.env.VITE_APP_REOWN_PROJECT_ID
@@ -321,6 +324,11 @@ export const useStateStore = defineStore('state', () => {
     success.transaction = ''
   }
 
+  function hideBanner() {
+    showBanner.value = false
+    localStorage.setItem('banner-status', '0')
+  }
+
   return {
     isConnected: readonly(isConnected),
     xarBalance: readonly(xarBalance),
@@ -331,6 +339,7 @@ export const useStateStore = defineStore('state', () => {
     depositUnlocked: readonly(depositUnlocked),
     withdrew: readonly(withdrew),
     address: readonly(address),
+    showBanner: readonly(showBanner),
     //
     connectWallet,
     disconnectWallet,
@@ -347,5 +356,6 @@ export const useStateStore = defineStore('state', () => {
     hideError,
     showSuccess,
     hideSuccess,
+    hideBanner,
   }
 })
