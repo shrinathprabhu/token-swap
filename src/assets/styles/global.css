@@ -220,7 +220,13 @@ a:visited {
   justify-content: center;
   height: 100%;
   overflow: auto;
-  padding: 2rem;
+  padding: 1rem;
+}
+
+@media screen and (min-width: 767px) {
+  .center-column {
+    padding: 2rem;
+  }
 }
 
 .center-column .card {

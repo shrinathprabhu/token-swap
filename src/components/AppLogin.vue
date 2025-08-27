@@ -20,11 +20,7 @@ async function handleConnect() {
       <button class="button primary" @click.stop="handleConnect">Connect Wallet</button>
     </div>
     <div class="card news">
-      <img
-        style="height: 6.875rem; width: 10rem"
-        class="img"
-        src="../assets/images/acquisition-xar-avail.jpg"
-      />
+      <img class="img" src="../assets/images/acquisition-xar-avail.jpg" />
       <div class="content flex-col">
         <div class="title">Announcement</div>
         <div class="description">Avail Acquires Arcana To Accelerate Multichain Scalability</div>
@@ -72,9 +68,24 @@ async function handleConnect() {
 .news {
   display: grid;
   padding: 0.75rem;
-  grid-template-columns: 10rem 1fr 6.25rem;
   gap: 1.5rem;
   align-items: center;
+}
+
+.img {
+  height: auto;
+  width: 100%;
+}
+
+@media screen and (min-width: 550px) {
+  .news {
+    grid-template-columns: 10rem 1fr 6.25rem;
+  }
+
+  .img {
+    height: 6.875rem;
+    width: 10rem;
+  }
 }
 
 .news .content {
