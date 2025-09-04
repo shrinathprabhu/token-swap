@@ -69,6 +69,6 @@ watch(availAmount, handleAVAILChange, { immediate: true })
 }
 
 .card {
-  padding: 2rem;
+  padding: 1.5rem;
 }
 </style>
