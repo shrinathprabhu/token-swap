@@ -56,8 +56,8 @@ async function handleWithdraw(phase: number) {
 </script>
 
 <template>
-  <div id="app-withdraw" class="card flex-col align-center" style="gap: 1rem">
-    <h2 style="margin-bottom: 1.5rem">Withdrawal Schedule</h2>
+  <div id="app-withdraw" class="card flex-col align-center" style="gap: 0.75rem">
+    <h2 style="margin-bottom: 0.25rem">Withdrawal Schedule</h2>
     <div
       v-if="Number(depositAmount)"
       class="flex withdraw-card justify-between align-center"
@@ -77,7 +77,7 @@ async function handleWithdraw(phase: number) {
     <div class="flex-col withdraw-card" style="gap: 1rem">
       <div class="flex justify-between align-center">
         <span :class="['text-light-slate', Number(state.depositAmount) ? 'deposited' : '']"
-          >Unlock 1</span
+          >Unlock 1 <span style="font-size: var(--fs-14)">(50%)</span></span
         >
         <div class="withdraw-chip green" v-if="state.withdrew[0]">Completed</div>
         <div class="withdraw-chip" v-else-if="isUnlock1">Withdraw today</div>
@@ -119,7 +119,7 @@ async function handleWithdraw(phase: number) {
     <div class="flex-col withdraw-card" style="gap: 1rem">
       <div class="flex justify-between align-center">
         <span :class="['text-light-slate', Number(state.depositAmount) ? 'deposited' : '']"
-          >Unlock 2</span
+          >Unlock 2 <span style="font-size: var(--fs-14)">(50%)</span></span
         >
         <div class="withdraw-chip green" v-if="state.withdrew[1]">Completed</div>
         <div class="withdraw-chip" v-else-if="isUnlock2">Withdraw today</div>

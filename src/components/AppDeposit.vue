@@ -98,14 +98,14 @@ watch(availAmount, handleAVAILChange, { immediate: true })
 </script>
 
 <template>
-  <div class="card flex-col align-center" style="gap: 1rem">
+  <div class="card flex-col align-center" style="gap: 0.75rem">
     <h2 class="text-center">Deposit XAR</h2>
-    <p class="text-center" style="font-size: var(--fs-16)">
+    <p class="text-center" style="font-size: var(--fs-14)">
       <span class="text-slate">Deposit your XAR token to initiate the conversion to AVAIL.</span>
       <br />
       <span class="text-slate" style="font-weight: 600">4 XAR = 1 AVAIL</span>
     </p>
-    <form @submit.prevent="" class="flex-col" style="gap: 1rem">
+    <form @submit.prevent="" class="flex-col" style="gap: 0.5rem">
       <div class="font-inter">
         <label for="xar-amt">Enter Deposit Amount</label>
         <div class="text-input justify-between">
@@ -190,7 +190,7 @@ watch(availAmount, handleAVAILChange, { immediate: true })
 
 <style lang="css" scoped>
 .card {
-  padding: 2rem;
+  padding: 1rem;
 }
 
 label {
@@ -207,7 +207,7 @@ label {
 form .button.primary {
   width: 100%;
   height: 3rem;
-  margin-top: 1.5rem;
+  margin-top: 0.75rem;
 }
 
 input {
